@@ -12,73 +12,110 @@ class NewMemo extends StatefulWidget {
 }
 
 class _NewMemoState extends State<NewMemo> {
-  final TextEditingController _memoController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _memoController.dispose();
     _titleController.dispose();
+    _contentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveMemo(BuildContext context) async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Title cannot be empty')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final memo = Memo(
+        title: _titleController.text,
+        content: _contentController.text,
+        createdAt: DateTime.now(),
+        modifiedAt: DateTime.now(),
+      );
+
+      await Provider.of<MemoProvider>(context, listen: false)
+          .addMemo(MemoItem.fromMemo(memo));
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save memo: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var memoProvider = Provider.of<MemoProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(
-          color: Colors.black,
-          onPressed: () {
-            if (_titleController.text.isNotEmpty &&
-                _memoController.text.isNotEmpty) {
-              memoProvider.addMemo(
-                MemoItem(
-                  title: _titleController.text,
-                  createdAt: DateTime.now(),
-                ),
-              );
-            }
-            Navigator.pop(context);
-          },
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              hintText: 'Title',
-              contentPadding: EdgeInsets.all(16.0),
-              border: InputBorder.none,
-              alignLabelWithHint: true,
-            ),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            textCapitalization: TextCapitalization.words,
-          ),
-          Expanded(
-            child: TextField(
-              controller: _memoController,
-              decoration: const InputDecoration(
-                hintText: 'Enter your memo...',
-                contentPadding: EdgeInsets.all(16.0),
-                border: InputBorder.none,
-                alignLabelWithHint: true,
+        actions: [
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: CircularProgressIndicator(),
               ),
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              textCapitalization: TextCapitalization.sentences,
-              textAlign: TextAlign.center,
-              expands: true,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.check, color: Colors.black),
+              onPressed: () => _saveMemo(context),
             ),
-          ),
         ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                hintText: 'Title',
+                border: InputBorder.none,
+                hintStyle: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: TextField(
+                controller: _contentController,
+                decoration: const InputDecoration(
+                  hintText: 'Start typing...',
+                  border: InputBorder.none,
+                ),
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

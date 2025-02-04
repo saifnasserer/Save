@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:save/Screens/memos.dart';
+import 'package:save/Screens/notifs.dart';
 import 'package:save/models/box.dart';
 import 'package:save/models/user.dart';
 
@@ -12,7 +13,7 @@ class Home extends StatelessWidget {
         padding: const EdgeInsets.all(15.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 10,
+          spacing: 15,
           children: [
             User(path: 'assets/characters/workingman.png'),
             Padding(
@@ -25,7 +26,7 @@ class Home extends StatelessWidget {
                     style: TextStyle(fontSize: 25, color: Colors.grey[600]),
                   ),
                 ),
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Saif',
@@ -38,41 +39,34 @@ class Home extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 HomeItem(
-                    path: 'assets/Icons/file.png',
-                    data: 'Memos',
-                    ontap: () {
-                      Navigator.pushNamed(context, Memo.ID);
-                    }),
+                  path: 'assets/Icons/file.png',
+                  data: 'Memos',
+                  ontap: () {
+                    Navigator.pushNamed(context, Memo.ID);
+                  },
+                ),
                 HomeItem(
-                    path: 'assets/Icons/yes.png', data: 'Todo', ontap: () {}),
+                  path: 'assets/Icons/bell.png',
+                  data: 'Notifs',
+                  ontap: () {
+                    Navigator.pushNamed(context, NotificationsScreen.ID);
+                  },
+                ),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                HomeItem(
-                  path: 'assets/Icons/play.png',
-                  data: 'Voice',
-                  ontap: () {},
-                ),
                 HomeItem(
                   path: 'assets/Icons/yes.png',
                   data: 'Todo',
                   ontap: () {},
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
                 HomeItem(
-                    path: 'assets/Icons/bell.png',
-                    data: 'Private',
-                    ontap: () {}),
-                HomeItem(
-                    path: 'assets/Icons/padlock.png',
-                    data: 'Notifs',
-                    ontap: () {}),
+                  path: 'assets/Icons/padlock.png',
+                  data: 'Private',
+                  ontap: () {},
+                ),
               ],
             ),
           ],
